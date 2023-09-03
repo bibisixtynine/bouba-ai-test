@@ -12,10 +12,59 @@
       font-size: 24px;
       padding: 100px;
     }
+    canvas {
+      background-color: transparent;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
   </style>
 </head>
 <body>
   <h1>Welcome to the Black and Red Page!</h1>
   <p>This is a simple black and red page served by your Glitch app.</p>
+  <button id="recordButton">Record Click</button>
+  <canvas id="canvas"></canvas>
+  
+  <script>
+    const recordButton = document.getElementById('recordButton');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const ws = new WebSocket(`wss://${window.location.hostname}`);
+
+    recordButton.addEventListener('click', () => {
+      ws.send('recordClick');
+    });
+
+    // Function to send mouse position data
+    function sendMousePosition(event) {
+      const { clientX, clientY } = event;
+      ws.send(`mousePosition,${clientX},${clientY}`);
+    }
+
+    // Listen for mousemove events
+    document.addEventListener('mousemove', sendMousePosition);
+
+    // Listen for WebSocket messages containing mouse position
+    ws.addEventListener('message', (event) => {
+      const data = event.data.split(',');
+      if (data[0] === 'mousePosition') {
+        const mouseX = parseInt(data[1]);
+        const mouseY = parseInt(data[2]);
+        drawBlueCircle(mouseX, mouseY);
+        console.log(mouseX)
+      }
+    });
+
+    // Function to draw a blue circle
+    function drawBlueCircle(x, y) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.beginPath();
+      context.arc(x, y, 10, 0, 2 * Math.PI);
+      context.fillStyle = 'blue';
+      context.fill();
+    }
+  </script>
 </body>
 </html>
