@@ -99,7 +99,18 @@
 
     // Handle mouse events
     let lastMouseClickTime = 0;
+    let isMouseDown = false; // Flag to track mouse button state
 
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    ///////
+    ////
+    //
+    
+    /*
     canvas.addEventListener('mousedown', (event) => {
       event.preventDefault();
 
@@ -119,6 +130,60 @@
 
       // Send mouse position to the server
       ws.send(`mousePosition,${mouseX},${mouseY}`);
+
+      // Set the mouse button state to down
+      isMouseDown = true;
+    });*/
+    
+    // Handle double clicks (mousedown event)
+canvas.addEventListener('mousedown', (event) => {
+  event.preventDefault();
+
+  const currentTime = new Date().getTime();
+  if (currentTime - lastMouseClickTime < 300) {
+    // Double click detected, send a message to the server to clear all clients' canvases
+    ws.send('clearCanvas');
+  }
+  lastMouseClickTime = currentTime;
+
+  const mouseX = event.clientX;
+  const mouseY = event.clientY;
+
+  // Update the blue circle based on mouse position
+  drawBlueCircle(mouseX, mouseY);
+
+  // Send mouse position to the server
+  ws.send(`mousePosition,${mouseX},${mouseY}`);
+});
+    
+    //
+    ////
+    /////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+
+
+    canvas.addEventListener('mousemove', (event) => {
+      if (isMouseDown) {
+        event.preventDefault();
+
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        // Update the blue circle based on mouse position
+        drawBlueCircle(mouseX, mouseY);
+
+        // Send mouse position to the server
+        ws.send(`mousePosition,${mouseX},${mouseY}`);
+      }
+    });
+
+    // Handle mouseup event to reset mouse button state
+    canvas.addEventListener('mouseup', () => {
+      isMouseDown = false;
     });
 
     // Handle messages received from the server
@@ -140,5 +205,6 @@
   </script>
 </body>
 </html>
+
 
 
