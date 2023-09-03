@@ -24,9 +24,13 @@
   </style>
 </head>
 <body>
+  <!--
   <h1>Welcome to the Black and Red Page!</h1>
   <p>This is a simple black and red page served by your Glitch app.</p>
   <button id="recordButton">Record Click</button>
+  -->
+  
+  
   <canvas id="canvas"></canvas>
   
   <script>
@@ -133,7 +137,8 @@
 
       // Set the mouse button state to down
       isMouseDown = true;
-    });*/
+    });
+    */
     
     // Handle double clicks (mousedown event)
 canvas.addEventListener('mousedown', (event) => {
@@ -143,6 +148,7 @@ canvas.addEventListener('mousedown', (event) => {
   if (currentTime - lastMouseClickTime < 300) {
     // Double click detected, send a message to the server to clear all clients' canvases
     ws.send('clearCanvas');
+    return
   }
   lastMouseClickTime = currentTime;
 
@@ -154,6 +160,9 @@ canvas.addEventListener('mousedown', (event) => {
 
   // Send mouse position to the server
   ws.send(`mousePosition,${mouseX},${mouseY}`);
+  
+        // Set the mouse button state to down
+      isMouseDown = true;
 });
     
     //

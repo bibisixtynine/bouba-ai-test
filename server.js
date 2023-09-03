@@ -68,6 +68,13 @@ wss.on("connection", (ws) => {
         mousePositions.length = 0; // Clear the array
       }
       */
+    } else if (stringMessage === "clearCanvas") {
+      // Broadcast the clearCanvas message to all clients
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send("clearCanvas");
+        }
+      });
     }
   });
 });
