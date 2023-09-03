@@ -47,7 +47,9 @@ wss.on('connection', (ws) => {
 
         // Send mouse position to all clients
         wss.clients.forEach((client) => {
+          console.log("send message")
           if (client.readyState === WebSocket.OPEN) {
+            console.log("to client n?")
             client.send(`mousePosition,${mouseX},${mouseY}`);
           }
         });

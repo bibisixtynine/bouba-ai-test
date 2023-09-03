@@ -47,8 +47,10 @@
     document.addEventListener('mousemove', sendMousePosition);
 
     // Listen for WebSocket messages containing mouse position
+    console.log("message listener added")
     ws.addEventListener('message', (event) => {
       const data = event.data.split(',');
+      console.log("message received")
       if (data[0] === 'mousePosition') {
         const mouseX = parseInt(data[1]);
         const mouseY = parseInt(data[2]);
