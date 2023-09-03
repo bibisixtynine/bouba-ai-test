@@ -60,6 +60,51 @@
 
       // Listen for mousemove events
       document.addEventListener("mousemove", sendMousePosition);
+      
+    // Variable to track whether touch events are active
+    let touchEventsActive = false;
+
+    // Handle touch events
+    canvas.addEventListener('touchstart', (event) => {
+      event.preventDefault(); // Prevent default touch behavior like scrolling
+
+      const touch = event.touches[0];
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      // Send touch position to the server
+      ws.send(`mousePosition,${touchX},${touchY}`);
+
+      // Prevent scrolling while touch events are active
+      document.body.style.overflow = 'hidden';
+
+      // Set touch events as active
+      touchEventsActive = true;
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+      if (touchEventsActive) {
+        event.preventDefault();
+
+        const touch = event.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Update the blue circle based on touch position
+        drawBlueCircle(touchX, touchY);
+
+        // Send touch position to the server
+        ws.send(`mousePosition,${touchX},${touchY}`);
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
+      // Allow scrolling when touch events are not active
+      document.body.style.overflow = 'auto';
+
+      // Reset touch events flag
+      touchEventsActive = false;
+    });
 
       // Listen for WebSocket messages containing mouse position
       ws.addEventListener("message", (event) => {

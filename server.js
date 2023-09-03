@@ -38,7 +38,7 @@ wss.on("connection", (ws) => {
     } else if (stringMessage.startsWith("mousePosition")) {
       const [, mouseX, mouseY] = stringMessage.split(",");
       const timestamp = Date.now();
-      mousePositions.push({ timestamp, x: mouseX, y: mouseY });
+      // mousePositions.push({ timestamp, x: mouseX, y: mouseY });
 
       // Limit the array size to 30 records per second
       if (mousePositions.length > 30) {
@@ -53,6 +53,7 @@ wss.on("connection", (ws) => {
       });
 
       // Write the mouse positions to a file every second
+      /*
       if (mousePositions.length === 30) {
         const dataToWrite = mousePositions
           .map(({ timestamp, x, y }) => `${timestamp},${x},${y}`)
@@ -66,6 +67,7 @@ wss.on("connection", (ws) => {
         });
         mousePositions.length = 0; // Clear the array
       }
+      */
     }
   });
 });
