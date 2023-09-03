@@ -1,183 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Black and Red Page</title>
-  <style>
-    body {
-      background-color: black;
-      color: red;
-      text-align: center;
-      font-size: 24px;
-      padding: 100px;
-      margin: 0; /* Remove margin to cover the entire viewport */
-      overflow: hidden; /* Hide any content overflow */
-    }
-    canvas {
-      background-color: transparent;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1000; /* Set a high z-index value to bring the canvas to the front */
-    }
-  </style>
-</head>
-<body>
-  <!--
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Black and Red Page</title>
+    <style>
+      body {
+        background-color: black;
+        color: red;
+        text-align: center;
+        font-size: 24px;
+        padding: 100px;
+        margin: 0; /* Remove margin to cover the entire viewport */
+        overflow: hidden; /* Hide any content overflow */
+      }
+      canvas {
+        background-color: transparent;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1000; /* Set a high z-index value to bring the canvas to the front */
+      }
+    </style>
+  </head>
+  <body>
+    <!--
   <h1>Welcome to the Black and Red Page!</h1>
   <p>This is a simple black and red page served by your Glitch app.</p>
   <button id="recordButton">Record Click</button>
   -->
-  
-  
-  <canvas id="canvas"></canvas>
-  
-  <script>
-    const recordButton = document.getElementById('recordButton');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    const ws = new WebSocket(`wss://${window.location.hostname}`);
 
-    // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
-    function resizeCanvas() {
-      const bodyWidth = document.body.clientWidth;
-      const bodyHeight = document.body.clientHeight;
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
+    <canvas id="canvas"></canvas>
 
-      // Set canvas dimensions to the maximum of body size and window size
-      canvas.width = Math.max(bodyWidth, windowWidth);
-      canvas.height = Math.max(bodyHeight, windowHeight);
-    }
+    <script>
+      const recordButton = document.getElementById("recordButton");
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+      const ws = new WebSocket(`wss://${window.location.hostname}`);
 
-    // Initialize canvas dimensions
-    resizeCanvas();
+      // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
+      function resizeCanvas() {
+        const bodyWidth = document.body.clientWidth;
+        const bodyHeight = document.body.clientHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
 
-    // Listen for window resize events
-    window.addEventListener('resize', resizeCanvas);
-
-    // Function to draw a blue circle
-    function drawBlueCircle(x, y) {
-      context.beginPath();
-      context.arc(x, y, 10, 0, 2 * Math.PI);
-      context.fillStyle = 'blue';
-      context.fill();
-    }
-
-    // Handle touch events
-    let lastTouchTime = 0;
-
-    canvas.addEventListener('touchstart', (event) => {
-      event.preventDefault(); // Prevent default touch behavior like scrolling
-
-      const currentTime = new Date().getTime();
-      if (currentTime - lastTouchTime < 300) {
-        // Double tap detected, clear the canvas
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        ws.send('clearCanvas'); // Notify the server to clear its canvas as well
+        // Set canvas dimensions to the maximum of body size and window size
+        canvas.width = Math.max(bodyWidth, windowWidth);
+        canvas.height = Math.max(bodyHeight, windowHeight);
       }
-      lastTouchTime = currentTime;
 
-      const touch = event.touches[0];
-      const touchX = touch.clientX;
-      const touchY = touch.clientY;
+      // Initialize canvas dimensions
+      resizeCanvas();
 
-      // Send touch position to the server
-      ws.send(`mousePosition,${touchX},${touchY}`);
-    });
+      // Listen for window resize events
+      window.addEventListener("resize", resizeCanvas);
 
-    canvas.addEventListener('touchmove', (event) => {
-      event.preventDefault();
-
-      const touch = event.touches[0];
-      const touchX = touch.clientX;
-      const touchY = touch.clientY;
-
-      // Update the blue circle based on touch position
-      drawBlueCircle(touchX, touchY);
-
-      // Send touch position to the server
-      ws.send(`mousePosition,${touchX},${touchY}`);
-    });
-
-    // Handle mouse events
-    let lastMouseClickTime = 0;
-    let isMouseDown = false; // Flag to track mouse button state
-
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    ///////
-    ////
-    //
-    
-    /*
-    canvas.addEventListener('mousedown', (event) => {
-      event.preventDefault();
-
-      const currentTime = new Date().getTime();
-      if (currentTime - lastMouseClickTime < 300) {
-        // Double click detected, clear the canvas
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        ws.send('clearCanvas'); // Notify the server to clear its canvas as well
+      // Function to draw a blue circle
+      function drawBlueCircle(x, y) {
+        context.beginPath();
+        context.arc(x, y, 10, 0, 2 * Math.PI);
+        context.fillStyle = "blue";
+        context.fill();
       }
-      lastMouseClickTime = currentTime;
 
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
+      // Handle touch events
+      let lastTouchTime = 0;
 
-      // Update the blue circle based on mouse position
-      drawBlueCircle(mouseX, mouseY);
+      canvas.addEventListener("touchstart", (event) => {
+        event.preventDefault(); // Prevent default touch behavior like scrolling
 
-      // Send mouse position to the server
-      ws.send(`mousePosition,${mouseX},${mouseY}`);
+        const currentTime = new Date().getTime();
+        if (currentTime - lastTouchTime < 300) {
+          // Double tap detected, clear the canvas
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          ws.send("clearCanvas"); // Notify the server to clear its canvas as well
+          return
+        }
+        lastTouchTime = currentTime;
 
-      // Set the mouse button state to down
-      isMouseDown = true;
-    });
-    */
-    
-    // Handle double clicks (mousedown event)
-canvas.addEventListener('mousedown', (event) => {
-  event.preventDefault();
+        const touch = event.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
 
-  const currentTime = new Date().getTime();
-  if (currentTime - lastMouseClickTime < 300) {
-    // Double click detected, send a message to the server to clear all clients' canvases
-    ws.send('clearCanvas');
-    return
-  }
-  lastMouseClickTime = currentTime;
+        // Send touch position to the server
+        ws.send(`mousePosition,${touchX},${touchY}`);
+      });
 
-  const mouseX = event.clientX;
-  const mouseY = event.clientY;
-
-  // Update the blue circle based on mouse position
-  drawBlueCircle(mouseX, mouseY);
-
-  // Send mouse position to the server
-  ws.send(`mousePosition,${mouseX},${mouseY}`);
-  
-        // Set the mouse button state to down
-      isMouseDown = true;
-});
-    
-    //
-    ////
-    /////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////
-
-
-    canvas.addEventListener('mousemove', (event) => {
-      if (isMouseDown) {
+      canvas.addEventListener("touchmove", (event) => {
         event.preventDefault();
+
+        const touch = event.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Update the blue circle based on touch position
+        drawBlueCircle(touchX, touchY);
+
+        // Send touch position to the server
+        ws.send(`mousePosition,${touchX},${touchY}`);
+      });
+
+      // Handle mouse events
+      let lastMouseClickTime = 0;
+      let isMouseDown = false; // Flag to track mouse button state
+
+
+      // Handle double clicks (mousedown event)
+      canvas.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+
+        const currentTime = new Date().getTime();
+        if (currentTime - lastMouseClickTime < 300) {
+          // Double click detected, send a message to the server to clear all clients' canvases
+          ws.send("clearCanvas");
+          return;
+        }
+        lastMouseClickTime = currentTime;
 
         const mouseX = event.clientX;
         const mouseY = event.clientY;
@@ -187,33 +126,73 @@ canvas.addEventListener('mousedown', (event) => {
 
         // Send mouse position to the server
         ws.send(`mousePosition,${mouseX},${mouseY}`);
-      }
-    });
 
-    // Handle mouseup event to reset mouse button state
-    canvas.addEventListener('mouseup', () => {
-      isMouseDown = false;
-    });
+        // Set the mouse button state to down
+        isMouseDown = true;
+      });
 
-    // Handle messages received from the server
+
+      canvas.addEventListener("mousemove", (event) => {
+        if (isMouseDown) {
+          event.preventDefault();
+
+          const mouseX = event.clientX;
+          const mouseY = event.clientY;
+
+          // Update the blue circle based on mouse position
+          drawBlueCircle(mouseX, mouseY);
+
+          // Send mouse position to the server
+          ws.send(`mousePosition,${mouseX},${mouseY}`);
+        }
+      });
+
+      // Handle mouseup event to reset mouse button state
+      canvas.addEventListener("mouseup", () => {
+        isMouseDown = false;
+      });
+
+      // Handle messages received from the server
+      ws.addEventListener("message", (event) => {
+        const message = event.data;
+        if (message.startsWith("mousePosition")) {
+          const [, mouseX, mouseY] = message.split(",");
+          drawBlueCircle(parseInt(mouseX), parseInt(mouseY));
+        } else if (message === "clearCanvas") {
+          context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+
+      recordButton.addEventListener("click", () => {
+        ws.send("recordClick");
+      });
+      
+          // Handle messages received from the server
     ws.addEventListener('message', (event) => {
       const message = event.data;
       if (message.startsWith('mousePosition')) {
         const [, mouseX, mouseY] = message.split(',');
         drawBlueCircle(parseInt(mouseX), parseInt(mouseY));
       } else if (message === 'clearCanvas') {
+        // Clear the canvas
         context.clearRect(0, 0, canvas.width, canvas.height);
+      } else if (message.startsWith('recordedCircles')) {
+        // Parse and draw recorded circles
+        const circleData = message.split('|')[1];
+        const circleArray = circleData.split(';');
+        circleArray.forEach((circle) => {
+          const [x, y] = circle.split(',');
+          drawBlueCircle(parseInt(x), parseInt(y));
+        });
       }
     });
 
-    recordButton.addEventListener('click', () => {
-      ws.send('recordClick');
+    // Send a request to the server to get recorded circles when the client connects
+    ws.addEventListener('open', () => {
+      ws.send('getRecordedCircles');
     });
 
-    // Rest of your code...
-  </script>
-</body>
+      // Rest of your code...
+    </script>
+  </body>
 </html>
-
-
-
