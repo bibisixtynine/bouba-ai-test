@@ -28,103 +28,113 @@
     <canvas id="canvas"></canvas>
 
     <script>
-      const recordButton = document.getElementById("recordButton");
-      const canvas = document.getElementById("canvas");
-      const context = canvas.getContext("2d");
-      const ws = new WebSocket(`wss://${window.location.hostname}`);
+        const recordButton = document.getElementById("recordButton");
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+        const ws = new WebSocket(`wss://${window.location.hostname}`);
 
-      // Function to resize the canvas to match the document's body size
-      function resizeCanvas() {
-        canvas.width = document.body.clientWidth;
-        canvas.height = document.body.clientHeight;
-      }
+        // Function to resize the canvas to match the document's body size
+        function resizeCanvas() {
+          canvas.width = document.body.clientWidth;
+          canvas.height = document.body.clientHeight;
+        }
 
-      // Initialize canvas dimensions
-      resizeCanvas();
+        // Initialize canvas dimensions
+        resizeCanvas();
 
-      // Listen for window resize events
-      window.addEventListener("resize", resizeCanvas);
+        // Listen for window resize events
+        window.addEventListener("resize", resizeCanvas);
 
-      // Listen for scroll events to update canvas dimensions
-      window.addEventListener("scroll", resizeCanvas);
+        // Listen for scroll events to update canvas dimensions
+        window.addEventListener("scroll", resizeCanvas);
 
-      recordButton.addEventListener("click", () => {
-        ws.send("recordClick");
-      });
+        recordButton.addEventListener("click", () => {
+          ws.send("recordClick");
+        });
 
-      // Function to send mouse position data
-      function sendMousePosition(event) {
-        const { clientX, clientY } = event;
-        ws.send(`mousePosition,${clientX},${clientY}`);
-      }
+        // Function to send mouse position data
+        function sendMousePosition(event) {
+          const { clientX, clientY } = event;
+          ws.send(`mousePosition,${clientX},${clientY}`);
+        }
 
-      // Listen for mousemove events
-      document.addEventListener("mousemove", sendMousePosition);
-      
-    // Variable to track whether touch events are active
-    let touchEventsActive = false;
+        // Listen for mousemove events
+        document.addEventListener("mousemove", sendMousePosition);
 
-    // Handle touch events
-    canvas.addEventListener('touchstart', (event) => {
-      event.preventDefault(); // Prevent default touch behavior like scrolling
+      // Variable to track whether touch events are active
+      let touchEventsActive = false;
 
-      const touch = event.touches[0];
-      const touchX = touch.clientX;
-      const touchY = touch.clientY;
-
-      // Send touch position to the server
-      ws.send(`mousePosition,${touchX},${touchY}`);
-
-      // Prevent scrolling while touch events are active
-      document.body.style.overflow = 'hidden';
-
-      // Set touch events as active
-      touchEventsActive = true;
-    });
-
-    canvas.addEventListener('touchmove', (event) => {
-      if (touchEventsActive) {
-        event.preventDefault();
+      // Handle touch events
+      canvas.addEventListener('touchstart', (event) => {
+        event.preventDefault(); // Prevent default touch behavior like scrolling
 
         const touch = event.touches[0];
         const touchX = touch.clientX;
         const touchY = touch.clientY;
 
-        // Update the blue circle based on touch position
-        drawBlueCircle(touchX, touchY);
-
         // Send touch position to the server
         ws.send(`mousePosition,${touchX},${touchY}`);
-      }
-    });
 
-    canvas.addEventListener('touchend', () => {
-      // Allow scrolling when touch events are not active
-      document.body.style.overflow = 'auto';
+        // Prevent scrolling while touch events are active
+        document.body.style.overflow = 'hidden';
 
-      // Reset touch events flag
-      touchEventsActive = false;
-    });
+        // Set touch events as active
+        touchEventsActive = true;
+      });
 
-      // Listen for WebSocket messages containing mouse position
-      ws.addEventListener("message", (event) => {
-        const data = event.data.split(",");
-        console.log("message received");
-        if (data[0] === "mousePosition") {
-          const mouseX = parseInt(data[1]);
-          const mouseY = parseInt(data[2]);
-          drawBlueCircle(mouseX, mouseY);
+      canvas.addEventListener('touchmove', (event) => {
+        if (touchEventsActive) {
+          event.preventDefault();
+
+          const touch = event.touches[0];
+          const touchX = touch.clientX;
+          const touchY = touch.clientY;
+
+          // Update the blue circle based on touch position
+          drawBlueCircle(touchX, touchY);
+
+          // Send touch position to the server
+          ws.send(`mousePosition,${touchX},${touchY}`);
         }
       });
 
-      // Function to draw a blue circle
-      function drawBlueCircle(x, y) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.beginPath();
-        context.arc(x + window.scrollX, y + window.scrollY, 10, 0, 2 * Math.PI);
-        context.fillStyle = "blue";
-        context.fill();
+      canvas.addEventListener('touchend', () => {
+        // Allow scrolling when touch events are not active
+        document.body.style.overflow = 'auto';
+
+        // Reset touch events flag
+        touchEventsActive = false;
+      });
+
+        // Prevent the view from scrolling on Safari iPhone
+    // Prevent the view from scrolling on Safari iPhone (alternative approach)
+    document.addEventListener('touchmove', (event) => {
+      if (touchEventsActive) {
+        event.preventDefault();
+        event.stopPropagation();
       }
+    }, { passive: false });
+      
+
+        // Listen for WebSocket messages containing mouse position
+        ws.addEventListener("message", (event) => {
+          const data = event.data.split(",");
+          console.log("message received");
+          if (data[0] === "mousePosition") {
+            const mouseX = parseInt(data[1]);
+            const mouseY = parseInt(data[2]);
+            drawBlueCircle(mouseX, mouseY);
+          }
+        });
+
+        // Function to draw a blue circle
+        function drawBlueCircle(x, y) {
+          //context.clearRect(0, 0, canvas.width, canvas.height);
+          context.beginPath();
+          context.arc(x + window.scrollX, y + window.scrollY, 10, 0, 2 * Math.PI);
+          context.fillStyle = "blue";
+          context.fill();
+        }
     </script>
   </body>
 </html>
