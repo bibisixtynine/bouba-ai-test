@@ -87,7 +87,13 @@ wss.on("connection", (ws) => {
       });
     } else if (stringMessage === "getRecordedCircles") {
       // Send recorded circles to the requesting client
+      
+      
       const recordedCircles = mousePositions.map(({ x, y }) => `${x},${y}`).join(';');
+      
+      console.log("💥 getRecordedCircles received -> send recordedCircles")
+    console.log(`recordedCircles|${recordedCircles}`)
+      
       ws.send(`recordedCircles|${recordedCircles}`);
     }
   });
