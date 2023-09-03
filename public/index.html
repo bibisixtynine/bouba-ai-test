@@ -47,7 +47,6 @@
     document.addEventListener('mousemove', sendMousePosition);
 
     // Listen for WebSocket messages containing mouse position
-    console.log("message listener added")
     ws.addEventListener('message', (event) => {
       const data = event.data.split(',');
       console.log("message received")
@@ -55,7 +54,6 @@
         const mouseX = parseInt(data[1]);
         const mouseY = parseInt(data[2]);
         drawBlueCircle(mouseX, mouseY);
-        console.log(mouseX)
       }
     });
 
