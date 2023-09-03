@@ -49,9 +49,10 @@ wss.on("connection", (ws) => {
       mousePositions.push({ timestamp, x: mouseX, y: mouseY });
 
       // Limit the array size to 30 records per second
+      /*
       if (mousePositions.length > 30) {
         mousePositions.shift();
-      }
+      }*/
 
       // Send mouse position to all clients
       wss.clients.forEach((client) => {

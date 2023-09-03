@@ -153,6 +153,7 @@
       });
 
       // Handle messages received from the server
+      /*
       ws.addEventListener("message", (event) => {
         const message = event.data;
         if (message.startsWith("mousePosition")) {
@@ -161,11 +162,8 @@
         } else if (message === "clearCanvas") {
           context.clearRect(0, 0, canvas.width, canvas.height);
         }
-      });
+      });*/
 
-      recordButton.addEventListener("click", () => {
-        ws.send("recordClick");
-      });
       
           // Handle messages received from the server
     ws.addEventListener('message', (event) => {
