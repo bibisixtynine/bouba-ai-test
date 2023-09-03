@@ -35,10 +35,16 @@
     const context = canvas.getContext('2d');
     const ws = new WebSocket(`wss://${window.location.hostname}`);
 
-    // Function to resize the canvas to match the document's body size
+    // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
     function resizeCanvas() {
-      canvas.width = document.body.clientWidth;
-      canvas.height = document.body.clientHeight;
+      const bodyWidth = document.body.clientWidth;
+      const bodyHeight = document.body.clientHeight;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      // Set canvas dimensions to the maximum of body size and window size
+      canvas.width = Math.max(bodyWidth, windowWidth);
+      canvas.height = Math.max(bodyHeight, windowHeight);
     }
 
     // Initialize canvas dimensions
@@ -49,7 +55,6 @@
 
     // Function to draw a blue circle
     function drawBlueCircle(x, y) {
-      //context.clearRect(0, 0, canvas.width, canvas.height);
       context.beginPath();
       context.arc(x, y, 10, 0, 2 * Math.PI);
       context.fillStyle = 'blue';
@@ -57,8 +62,18 @@
     }
 
     // Handle touch events
+    let lastTouchTime = 0;
+
     canvas.addEventListener('touchstart', (event) => {
       event.preventDefault(); // Prevent default touch behavior like scrolling
+
+      const currentTime = new Date().getTime();
+      if (currentTime - lastTouchTime < 300) {
+        // Double tap detected, clear the canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        ws.send('clearCanvas'); // Notify the server to clear its canvas as well
+      }
+      lastTouchTime = currentTime;
 
       const touch = event.touches[0];
       const touchX = touch.clientX;
@@ -83,8 +98,18 @@
     });
 
     // Handle mouse events
-    canvas.addEventListener('mousemove', (event) => {
+    let lastMouseClickTime = 0;
+
+    canvas.addEventListener('mousedown', (event) => {
       event.preventDefault();
+
+      const currentTime = new Date().getTime();
+      if (currentTime - lastMouseClickTime < 300) {
+        // Double click detected, clear the canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        ws.send('clearCanvas'); // Notify the server to clear its canvas as well
+      }
+      lastMouseClickTime = currentTime;
 
       const mouseX = event.clientX;
       const mouseY = event.clientY;
@@ -96,15 +121,17 @@
       ws.send(`mousePosition,${mouseX},${mouseY}`);
     });
 
-        // Handle messages received from the server
+    // Handle messages received from the server
     ws.addEventListener('message', (event) => {
       const message = event.data;
       if (message.startsWith('mousePosition')) {
         const [, mouseX, mouseY] = message.split(',');
         drawBlueCircle(parseInt(mouseX), parseInt(mouseY));
+      } else if (message === 'clearCanvas') {
+        context.clearRect(0, 0, canvas.width, canvas.height);
       }
     });
-    
+
     recordButton.addEventListener('click', () => {
       ws.send('recordClick');
     });
@@ -113,4 +140,5 @@
   </script>
 </body>
 </html>
+
 
