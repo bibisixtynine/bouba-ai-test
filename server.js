@@ -23,6 +23,14 @@ app.get("/", (req, res) => {
 
 // WebSocket server logic
 wss.on("connection", (ws) => {
+  // Send recorded circles to the new client when they connect
+  const recordedCircles = mousePositions.map(({ x, y }) => `${x},${y}`).join(';');
+  if (recordedCircles) {
+    console.log("💥 new client connected, send recordedCircles")
+    console.log(`${recordedCircles}`)
+    ws.send(`${recordedCircles}`);
+  }
+
   ws.on("message", (message) => {
     const stringMessage = message.toString();
 
@@ -38,7 +46,7 @@ wss.on("connection", (ws) => {
     } else if (stringMessage.startsWith("mousePosition")) {
       const [, mouseX, mouseY] = stringMessage.split(",");
       const timestamp = Date.now();
-      // mousePositions.push({ timestamp, x: mouseX, y: mouseY });
+      mousePositions.push({ timestamp, x: mouseX, y: mouseY });
 
       // Limit the array size to 30 records per second
       if (mousePositions.length > 30) {
@@ -69,12 +77,18 @@ wss.on("connection", (ws) => {
       }
       */
     } else if (stringMessage === "clearCanvas") {
+              mousePositions.length = 0; // Clear the array
+
       // Broadcast the clearCanvas message to all clients
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           client.send("clearCanvas");
         }
       });
+    } else if (stringMessage === "getRecordedCircles") {
+      // Send recorded circles to the requesting client
+      const recordedCircles = mousePositions.map(({ x, y }) => `${x},${y}`).join(';');
+      ws.send(`recordedCircles|${recordedCircles}`);
     }
   });
 });
