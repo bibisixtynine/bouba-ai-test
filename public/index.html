@@ -37,7 +37,7 @@
       const canvas = document.getElementById("canvas");
       const context = canvas.getContext("2d");
       const ws = new WebSocket(`wss://${window.location.hostname}`);
-      const isConnected = false
+      let isConnected = false
 
       // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
       function resizeCanvas() {
