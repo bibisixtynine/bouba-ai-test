@@ -24,8 +24,10 @@ app.get('/', (req, res) => {
 // WebSocket server logic
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
-    console.log(`Received message: ${message}`);
+    console.log(`Received message: <${message}>`);
+
     if (typeof message === 'string') {
+      console.log(message.startsWith('mousePosition'))
       if (message === 'recordClick') {
         const currentDate = new Date().toLocaleString();
         fs.appendFile('clicks.txt', `${currentDate}\n`, (err) => {
@@ -36,6 +38,7 @@ wss.on('connection', (ws) => {
           }
         });
       } else if (message.startsWith('mousePosition')) {
+        console.log("mousePosition received")
         const [, mouseX, mouseY] = message.split(',');
         const timestamp = Date.now();
         mousePositions.push({ timestamp, x: mouseX, y: mouseY });
@@ -46,10 +49,11 @@ wss.on('connection', (ws) => {
         }
 
         // Send mouse position to all clients
+        console.log("S1/3 send message")
         wss.clients.forEach((client) => {
-          console.log("send message")
+          console.log("S2/3 send message")
           if (client.readyState === WebSocket.OPEN) {
-            console.log("to client n?")
+            console.log("S3/3 to client n?")
             client.send(`mousePosition,${mouseX},${mouseY}`);
           }
         });
