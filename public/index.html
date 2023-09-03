@@ -49,7 +49,7 @@
 
     // Function to draw a blue circle
     function drawBlueCircle(x, y) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      //context.clearRect(0, 0, canvas.width, canvas.height);
       context.beginPath();
       context.arc(x, y, 10, 0, 2 * Math.PI);
       context.fillStyle = 'blue';
@@ -82,6 +82,29 @@
       ws.send(`mousePosition,${touchX},${touchY}`);
     });
 
+    // Handle mouse events
+    canvas.addEventListener('mousemove', (event) => {
+      event.preventDefault();
+
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+
+      // Update the blue circle based on mouse position
+      drawBlueCircle(mouseX, mouseY);
+
+      // Send mouse position to the server
+      ws.send(`mousePosition,${mouseX},${mouseY}`);
+    });
+
+        // Handle messages received from the server
+    ws.addEventListener('message', (event) => {
+      const message = event.data;
+      if (message.startsWith('mousePosition')) {
+        const [, mouseX, mouseY] = message.split(',');
+        drawBlueCircle(parseInt(mouseX), parseInt(mouseY));
+      }
+    });
+    
     recordButton.addEventListener('click', () => {
       ws.send('recordClick');
     });
@@ -90,3 +113,4 @@
   </script>
 </body>
 </html>
+
