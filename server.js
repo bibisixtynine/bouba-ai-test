@@ -24,10 +24,12 @@ app.get("/", (req, res) => {
 // WebSocket server logic
 wss.on("connection", (ws) => {
   // Send recorded circles to the new client when they connect
-  const recordedCircles = mousePositions.map(({ x, y }) => `${x},${y}`).join(';');
+  const recordedCircles = mousePositions
+    .map(({ x, y }) => `${x},${y}`)
+    .join(";");
   if (recordedCircles) {
-    console.log("💥 new client connected, send recordedCircles")
-    console.log(`${recordedCircles}`)
+    console.log("💥 new client connected, send recordedCircles");
+    console.log(`${recordedCircles}`);
     ws.send(`${recordedCircles}`);
   }
 
@@ -78,7 +80,7 @@ wss.on("connection", (ws) => {
       }
       */
     } else if (stringMessage === "clearCanvas") {
-              mousePositions.length = 0; // Clear the array
+      mousePositions.length = 0; // Clear the array
 
       // Broadcast the clearCanvas message to all clients
       wss.clients.forEach((client) => {
@@ -88,13 +90,14 @@ wss.on("connection", (ws) => {
       });
     } else if (stringMessage === "getRecordedCircles") {
       // Send recorded circles to the requesting client
-      
-      
-      const recordedCircles = mousePositions.map(({ x, y }) => `${x},${y}`).join(';');
-      
-      console.log("💥 getRecordedCircles received -> send recordedCircles")
-    console.log(`recordedCircles|${recordedCircles}`)
-      
+
+      const recordedCircles = mousePositions
+        .map(({ x, y }) => `${x},${y}`)
+        .join(";");
+
+      console.log("💥 getRecordedCircles received -> send recordedCircles");
+      console.log(`recordedCircles|${recordedCircles}`);
+
       ws.send(`recordedCircles|${recordedCircles}`);
     }
   });
