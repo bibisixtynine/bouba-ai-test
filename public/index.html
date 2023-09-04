@@ -121,23 +121,59 @@
   // Handle mouse events
   let isMouseDown = false;
 
-  canvas.addEventListener("mousedown", (event) => {
-    event.preventDefault();
+// Handle double clicks (mousedown event)
+let lastMouseClickTime = 0;
 
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
+canvas.addEventListener("mousedown", (event) => {
+  event.preventDefault();
 
-    // Update the blue circle based on mouse position
-    drawBlueCircle(mouseX, mouseY);
+  const currentTime = new Date().getTime();
+  if (currentTime - lastMouseClickTime < 300) {
+    // Double click detected, send a message to the server to clear all clients' canvases
+    ws.send("clearCanvas");
+    return;
+  }
+  lastMouseClickTime = currentTime;
 
-    // Send mouse position to the server
-    if (isConnected) {
-      ws.send(`mousePosition,${mouseX},${mouseY}`);
-    }
+  const mouseX = event.clientX;
+  const mouseY = event.clientY;
 
-    // Set the mouse button state to down
-    isMouseDown = true;
-  });
+  // Update the blue circle based on mouse position
+  drawBlueCircle(mouseX, mouseY);
+
+  // Send mouse position to the server
+  if (isConnected) {
+    ws.send(`mousePosition,${mouseX},${mouseY}`);
+  }
+
+  // Set the mouse button state to down
+  isMouseDown = true;
+});
+
+// Handle double taps (touchstart event)
+let lastTouchStartTime = 0;
+
+canvas.addEventListener("touchstart", (event) => {
+  event.preventDefault(); // Prevent default touch behavior like scrolling
+
+  const currentTime = new Date().getTime();
+  if (currentTime - lastTouchStartTime < 300) {
+    // Double tap detected, clear the canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    ws.send("clearCanvas"); // Notify the server to clear its canvas as well
+    return;
+  }
+  lastTouchStartTime = currentTime;
+
+  const touch = event.touches[0];
+  const touchX = touch.clientX;
+  const touchY = touch.clientY;
+
+  // Send touch position to the server
+  if (isConnected) {
+    ws.send(`mousePosition,${touchX},${touchY}`);
+  }
+});
 
   canvas.addEventListener("mousemove", (event) => {
     if (isMouseDown) {
