@@ -99,6 +99,11 @@
       function connectWebSocket() {
         ws = new WebSocket(`wss://${window.location.hostname}`);
 
+        /*
+        ws.on("connection", function (ws) {
+          ws.on("error", console.error);
+        });*/
+
         // 3.1) OPEN
         ws.addEventListener("open", () => {
           isConnected = true;
