@@ -25,6 +25,15 @@
         z-index: 1000; /* Set a high z-index value to bring the canvas to the front */
       }
     </style>
+    
+    <script>
+      // force https !
+      if (location.protocol != "https:") {
+        location.href =
+          "https:" +
+          window.location.href.substring(window.location.protocol.length);
+      }
+    </script>
 
   </head>
   <body>
