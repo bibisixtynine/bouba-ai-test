@@ -50,7 +50,14 @@
       const context = canvas.getContext("2d");
       let isConnected = false;
       let ws;
+      
+      
 
+      //////////////////////////////////////////////////////////////
+      //
+      // 1) CANVAS
+      //
+      
       // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
       function resizeCanvas() {
         const bodyWidth = document.body.clientWidth;
@@ -71,7 +78,14 @@
 
       // Listen for window resize events
       window.addEventListener("resize", resizeCanvas);
+      
+      
 
+      //////////////////////////////////////////////////////////////
+      //
+      // 2) DRAW
+      //
+      
       // Function to draw a blue circle
       function drawBlueCircle(x, y) {
         context.beginPath();
@@ -79,11 +93,19 @@
         context.fillStyle = "blue";
         context.fill();
       }
+      
+      
+      
+      //////////////////////////////////////////////////////////////
+      //
+      // 3) WEBSOCKET CONNECTION & RECONNECTION
+      //
 
       // Handle WebSocket connection and reconnection
       function connectWebSocket() {
         ws = new WebSocket(`wss://${window.location.hostname}`);
 
+        // 3.1) OPEN
         ws.addEventListener("open", () => {
           isConnected = true;
           console.log("WebSocket connection established");
@@ -99,6 +121,7 @@
           }
         });
 
+        // 3.2) MESSAGES
         ws.addEventListener("message", (event) => {
           const message = event.data;
           if (message.startsWith("mousePosition")) {
@@ -116,15 +139,17 @@
           }
         });
 
+        // 3.3) IF CLOSE EVENT... PAUSE THEN RECONNECT
         ws.addEventListener("close", () => {
           isConnected = false;
           console.log(
-            "WebSocket connection closed. Reconnecting in 5 seconds..."
+            "WebSocket connection closed. Reconnecting in 1 seconds..."
           );
           setTimeout(connectWebSocket, 1000); // Reconnect after 1s
         });
       }
 
+      
       // Initial WebSocket connection
       connectWebSocket();
 
@@ -145,15 +170,15 @@
           isBufferingMessages = true;
         }
       }
-      
+
       function sendClearCanvas() {
-    if (isConnected) {
-      ws.send("clearCanvas");
-    } else {
-      bufferedMessages.push("clearCanvas");
-      isBufferingMessages = true;
-    }
-  }
+        if (isConnected) {
+          ws.send("clearCanvas");
+        } else {
+          bufferedMessages.push("clearCanvas");
+          isBufferingMessages = true;
+        }
+      }
 
       canvas.addEventListener("mousedown", (event) => {
         event.preventDefault();
@@ -161,7 +186,7 @@
         const currentTime = new Date().getTime();
         if (currentTime - lastMouseClickTime < 300) {
           // Double click detected, send a message to the server to clear all clients' canvases
-          ws.send("clearCanvas");
+      sendClearCanvas();
           return;
         }
         lastMouseClickTime = currentTime;
@@ -189,7 +214,7 @@
         if (currentTime - lastTouchStartTime < 300) {
           // Double tap detected, clear the canvas
           context.clearRect(0, 0, canvas.width, canvas.height);
-          ws.send("clearCanvas"); // Notify the server to clear its canvas as well
+      sendClearCanvas();
           return;
         }
         lastTouchStartTime = currentTime;
@@ -225,6 +250,8 @@
         isMouseDown = false;
       });
 
+      
+      
       // Handle touch events
       let lastTouchTime = 0;
 
@@ -235,7 +262,7 @@
         if (currentTime - lastTouchTime < 300) {
           // Double tap detected, clear the canvas
           context.clearRect(0, 0, canvas.width, canvas.height);
-          ws.send("clearCanvas"); // Notify the server to clear its canvas as well
+      sendClearCanvas();
           return;
         }
         lastTouchTime = currentTime;
