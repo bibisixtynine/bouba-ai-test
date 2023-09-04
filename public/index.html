@@ -88,6 +88,15 @@
           isConnected = true;
           console.log("WebSocket connection established");
           ws.send("getRecordedCircles");
+
+          // Send buffered messages if any
+          if (isBufferingMessages) {
+            bufferedMessages.forEach((message) => {
+              ws.send(message);
+            });
+            bufferedMessages.length = 0; // Clear the buffer
+            isBufferingMessages = false;
+          }
         });
 
         ws.addEventListener("message", (event) => {
@@ -136,6 +145,15 @@
           isBufferingMessages = true;
         }
       }
+      
+      function sendClearCanvas() {
+    if (isConnected) {
+      ws.send("clearCanvas");
+    } else {
+      bufferedMessages.push("clearCanvas");
+      isBufferingMessages = true;
+    }
+  }
 
       canvas.addEventListener("mousedown", (event) => {
         event.preventDefault();
@@ -154,8 +172,8 @@
         // Update the blue circle based on mouse position
         drawBlueCircle(mouseX, mouseY);
 
-    // Send mouse position to the server
-    sendMousePosition(mouseX, mouseY);
+        // Send mouse position to the server
+        sendMousePosition(mouseX, mouseY);
 
         // Set the mouse button state to down
         isMouseDown = true;
@@ -197,9 +215,8 @@
           drawBlueCircle(mouseX, mouseY);
 
           // Send mouse position to the server
-          if (isConnected) {
-            ws.send(`mousePosition,${mouseX},${mouseY}`);
-          }
+          // Send mouse position to the server
+          sendMousePosition(mouseX, mouseY);
         }
       });
 
@@ -228,9 +245,8 @@
         const touchY = touch.clientY;
 
         // Send touch position to the server
-        if (isConnected) {
-          ws.send(`mousePosition,${touchX},${touchY}`);
-        }
+        // Send mouse position to the server
+        sendMousePosition(touchX, touchY);
       });
 
       canvas.addEventListener("touchmove", (event) => {
@@ -244,9 +260,7 @@
         drawBlueCircle(touchX, touchY);
 
         // Send touch position to the server
-        if (isConnected) {
-          ws.send(`mousePosition,${touchX},${touchY}`);
-        }
+        sendMousePosition(touchX, touchY);
       });
     </script>
   </body>
