@@ -50,14 +50,12 @@
       const context = canvas.getContext("2d");
       let isConnected = false;
       let ws;
-      
-      
 
       //////////////////////////////////////////////////////////////
       //
       // 1) CANVAS
       //
-      
+
       // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
       function resizeCanvas() {
         const bodyWidth = document.body.clientWidth;
@@ -78,14 +76,12 @@
 
       // Listen for window resize events
       window.addEventListener("resize", resizeCanvas);
-      
-      
 
       //////////////////////////////////////////////////////////////
       //
       // 2) DRAW
       //
-      
+
       // Function to draw a blue circle
       function drawBlueCircle(x, y) {
         context.beginPath();
@@ -93,9 +89,7 @@
         context.fillStyle = "blue";
         context.fill();
       }
-      
-      
-      
+
       //////////////////////////////////////////////////////////////
       //
       // 3) WEBSOCKET CONNECTION & RECONNECTION
@@ -149,15 +143,14 @@
         });
       }
 
-      
+      // 3.0) CONNECTION !
       // Initial WebSocket connection
       connectWebSocket();
 
-      // Handle mouse events
-      let isMouseDown = false;
-
-      // Handle double clicks (mousedown event)
-      let lastMouseClickTime = 0;
+      //////////////////////////////////////////////////////////////
+      //
+      // 4) Send message & buffering
+      //
 
       let isBufferingMessages = false;
       const bufferedMessages = [];
@@ -180,13 +173,23 @@
         }
       }
 
+      //////////////////////////////////////////////////////////////
+      //
+      // 5) Handle mouse events
+      //
+
+      let isMouseDown = false;
+
+      // Handle double clicks (mousedown event)
+      let lastMouseClickTime = 0;
+
       canvas.addEventListener("mousedown", (event) => {
         event.preventDefault();
 
         const currentTime = new Date().getTime();
         if (currentTime - lastMouseClickTime < 300) {
           // Double click detected, send a message to the server to clear all clients' canvases
-      sendClearCanvas();
+          sendClearCanvas();
           return;
         }
         lastMouseClickTime = currentTime;
@@ -204,31 +207,6 @@
         isMouseDown = true;
       });
 
-      // Handle double taps (touchstart event)
-      let lastTouchStartTime = 0;
-
-      canvas.addEventListener("touchstart", (event) => {
-        event.preventDefault(); // Prevent default touch behavior like scrolling
-
-        const currentTime = new Date().getTime();
-        if (currentTime - lastTouchStartTime < 300) {
-          // Double tap detected, clear the canvas
-          context.clearRect(0, 0, canvas.width, canvas.height);
-      sendClearCanvas();
-          return;
-        }
-        lastTouchStartTime = currentTime;
-
-        const touch = event.touches[0];
-        const touchX = touch.clientX;
-        const touchY = touch.clientY;
-
-        // Send touch position to the server
-        if (isConnected) {
-          ws.send(`mousePosition,${touchX},${touchY}`);
-        }
-      });
-
       canvas.addEventListener("mousemove", (event) => {
         if (isMouseDown) {
           event.preventDefault();
@@ -240,7 +218,6 @@
           drawBlueCircle(mouseX, mouseY);
 
           // Send mouse position to the server
-          // Send mouse position to the server
           sendMousePosition(mouseX, mouseY);
         }
       });
@@ -250,8 +227,11 @@
         isMouseDown = false;
       });
 
-      
-      
+      //////////////////////////////////////////////////////////////
+      //
+      // 6) Handle touch events
+      //
+
       // Handle touch events
       let lastTouchTime = 0;
 
@@ -262,7 +242,7 @@
         if (currentTime - lastTouchTime < 300) {
           // Double tap detected, clear the canvas
           context.clearRect(0, 0, canvas.width, canvas.height);
-      sendClearCanvas();
+          sendClearCanvas();
           return;
         }
         lastTouchTime = currentTime;
