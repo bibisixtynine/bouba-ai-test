@@ -105,6 +105,15 @@ wss.on("connection", (ws) => {
   });
 });
 
+/*
 const listener = server.listen(process.env.PORT, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
+*/
+
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+

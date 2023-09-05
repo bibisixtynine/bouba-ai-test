@@ -33,11 +33,13 @@
     </style>
     <script>
       // Ensure the page is loaded over HTTPS
+      /*
       if (location.protocol != "https:") {
         location.href =
           "https:" +
           window.location.href.substring(window.location.protocol.length);
       }
+      */
     </script>
   </head>
   <body>
@@ -80,7 +82,9 @@
 
       // 3) WEBSOCKET CONNECTION
       function connectWebSocket() {
-        ws = new WebSocket(`wss://${window.location.hostname}`);
+        //ws = new WebSocket(`wss://${window.location.hostname}`);
+        ws = new WebSocket(`ws://localhost:3000`);
+
 
         // WebSocket error handling
         ws.addEventListener("error", (error) => {
