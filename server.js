@@ -32,6 +32,8 @@ wss.on("connection", (ws) => {
     console.log(`${recordedCircles}`);
     ws.send(`${recordedCircles}`);
   }
+  
+  ws.on('error', console.error);
 
   ws.on("message", (message) => {
     const stringMessage = message.toString();
