@@ -3,9 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta name="apple-mobile-web-app-capable" content="yes" />
-
     <title>Black and Red Page</title>
     <style>
       body {
@@ -14,20 +12,19 @@
         text-align: center;
         font-size: 24px;
         padding: 100px;
-        margin: 0; /* Remove margin to cover the entire viewport */
-        overflow: hidden; /* Hide any content overflow */
+        margin: 0;
+        overflow: hidden;
       }
       canvas {
         background-color: transparent;
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 1000; /* Set a high z-index value to bring the canvas to the front */
+        z-index: 1000;
       }
     </style>
-
     <script>
-      // force https !
+      // Ensure the page is loaded over HTTPS
       if (location.protocol != "https:") {
         location.href =
           "https:" +
@@ -36,27 +33,15 @@
     </script>
   </head>
   <body>
-    <!--
-  <h1>Welcome to the Black and Red Page!</h1>
-  <p>This is a simple black and red page served by your Glitch app.</p>
-  <button id="recordButton">Record Click</button>
-  -->
-
     <canvas id="canvas"></canvas>
-
     <script>
-      const recordButton = document.getElementById("recordButton");
+      // Initialize variables
       const canvas = document.getElementById("canvas");
       const context = canvas.getContext("2d");
       let isConnected = false;
       let ws;
 
-      //////////////////////////////////////////////////////////////
-      //
-      // 1) CANVAS
-      //
-
-      // Function to resize the canvas to match the maximum of the document's body size and window's inner dimensions
+      // 1) CANVAS RESIZE
       function resizeCanvas() {
         const bodyWidth = document.body.clientWidth;
         const bodyHeight = document.body.clientHeight;
@@ -77,12 +62,7 @@
       // Listen for window resize events
       window.addEventListener("resize", resizeCanvas);
 
-      //////////////////////////////////////////////////////////////
-      //
-      // 2) DRAW
-      //
-
-      // Function to draw a blue circle
+      // 2) DRAW FUNCTIONS
       function drawBlueCircle(x, y) {
         context.beginPath();
         context.arc(x, y, 10, 0, 2 * Math.PI);
@@ -90,37 +70,25 @@
         context.fill();
       }
 
-      //////////////////////////////////////////////////////////////
-      //
-      // 3) WEBSOCKET CONNECTION & RECONNECTION
-      //
-
-      // Handle WebSocket connection and reconnection
+      // 3) WEBSOCKET CONNECTION
       function connectWebSocket() {
         ws = new WebSocket(`wss://${window.location.hostname}`);
 
-        /*
-        ws.on("connection", function (ws) {
-          ws.on("error", console.error);
-        });*/
+        // WebSocket error handling
+        ws.addEventListener("error", (error) => {
+          console.error("WebSocket error:", error);
 
-        // 3.1) OPEN
+          // Handle the error as needed, e.g., by displaying an error message to the user
+        });
+
+        // WebSocket open
         ws.addEventListener("open", () => {
           isConnected = true;
           console.log("WebSocket connection established");
           ws.send("getRecordedCircles");
-
-          // Send buffered messages if any
-          if (isBufferingMessages) {
-            bufferedMessages.forEach((message) => {
-              ws.send(message);
-            });
-            bufferedMessages.length = 0; // Clear the buffer
-            isBufferingMessages = false;
-          }
         });
 
-        // 3.2) MESSAGES
+        // WebSocket message received
         ws.addEventListener("message", (event) => {
           const message = event.data;
           if (message.startsWith("mousePosition")) {
@@ -138,25 +106,20 @@
           }
         });
 
-        // 3.3) IF CLOSE EVENT... PAUSE THEN RECONNECT
+        // WebSocket close
         ws.addEventListener("close", () => {
           isConnected = false;
           console.log(
-            "WebSocket connection closed. Reconnecting in 1 seconds..."
+            "WebSocket connection closed. Reconnecting in 1 second..."
           );
-          setTimeout(connectWebSocket, 1000); // Reconnect after 1s
+          setTimeout(connectWebSocket, 1000);
         });
       }
 
-      // 3.0) CONNECTION !
       // Initial WebSocket connection
       connectWebSocket();
 
-      //////////////////////////////////////////////////////////////
-      //
-      // 4) Send message & buffering
-      //
-
+      // 4) SEND MESSAGES & BUFFERING
       let isBufferingMessages = false;
       const bufferedMessages = [];
 
@@ -178,100 +141,63 @@
         }
       }
 
-      //////////////////////////////////////////////////////////////
-      //
-      // 5) Handle mouse events
-      //
-
+      // 5) HANDLE MOUSE EVENTS
       let isMouseDown = false;
-
-      // Handle double clicks (mousedown event)
       let lastMouseClickTime = 0;
 
       canvas.addEventListener("mousedown", (event) => {
         event.preventDefault();
-
         const currentTime = new Date().getTime();
         if (currentTime - lastMouseClickTime < 300) {
-          // Double click detected, send a message to the server to clear all clients' canvases
           sendClearCanvas();
           return;
         }
         lastMouseClickTime = currentTime;
-
         const mouseX = event.clientX;
         const mouseY = event.clientY;
-
-        // Update the blue circle based on mouse position
         drawBlueCircle(mouseX, mouseY);
-
-        // Send mouse position to the server
         sendMousePosition(mouseX, mouseY);
-
-        // Set the mouse button state to down
         isMouseDown = true;
       });
 
       canvas.addEventListener("mousemove", (event) => {
         if (isMouseDown) {
           event.preventDefault();
-
           const mouseX = event.clientX;
           const mouseY = event.clientY;
-
-          // Update the blue circle based on mouse position
           drawBlueCircle(mouseX, mouseY);
-
-          // Send mouse position to the server
           sendMousePosition(mouseX, mouseY);
         }
       });
 
-      // Handle mouseup event to reset mouse button state
       canvas.addEventListener("mouseup", () => {
         isMouseDown = false;
       });
 
-      //////////////////////////////////////////////////////////////
-      //
-      // 6) Handle touch events
-      //
-
-      // Handle touch events
+      // 6) HANDLE TOUCH EVENTS
       let lastTouchTime = 0;
 
       canvas.addEventListener("touchstart", (event) => {
-        event.preventDefault(); // Prevent default touch behavior like scrolling
-
+        event.preventDefault();
         const currentTime = new Date().getTime();
         if (currentTime - lastTouchTime < 300) {
-          // Double tap detected, clear the canvas
           context.clearRect(0, 0, canvas.width, canvas.height);
           sendClearCanvas();
           return;
         }
         lastTouchTime = currentTime;
-
         const touch = event.touches[0];
         const touchX = touch.clientX;
         const touchY = touch.clientY;
-
-        // Send touch position to the server
-        // Send mouse position to the server
         sendMousePosition(touchX, touchY);
       });
 
       canvas.addEventListener("touchmove", (event) => {
         event.preventDefault();
-
         const touch = event.touches[0];
         const touchX = touch.clientX;
         const touchY = touch.clientY;
-
-        // Update the blue circle based on touch position
         drawBlueCircle(touchX, touchY);
-
-        // Send touch position to the server
         sendMousePosition(touchX, touchY);
       });
     </script>
